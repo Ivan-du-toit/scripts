@@ -29,6 +29,10 @@ end
 
 # TODO: Make the config file location configurable by passing it in as a optional paramater.
 # TODO: Add a verbose flag and suppress the output if it is missing.
+# TODO: Add param to generate the source DIR list from a directory structure.
+
+verbose = false
+
 if ARGV.length == 0
     sources.push(".")
 else
@@ -38,8 +42,10 @@ else
 end
 
 config = YAML.load_file(config_file)
-puts "Config: "
-puts config
+if verbose
+    puts "Config: "
+    puts config
+end
 
 rules = []
 for rule in config["rules"] do
@@ -65,16 +71,21 @@ sources.each do |sourceDir|
                 matches = matches +1
 
                 unless Dir.exists?(sourceDir + "/" + rule["dest"]) 
-                    puts "Creating dir: " + rule["dest"]
+                    if verbose
+                        puts "Creating dir: " + rule["dest"]
+                    end
                     Dir.mkdir(sourceDir + "/" + rule["dest"])
                 end
 
                 if rule["action"] == "move"
-                    puts "Moving " + sourceDir + "/" + rule["source"] + "/" + file_name + " to " + sourceDir + "/" + rule["dest"] + "/" + new_file_name
-                    #File.rename(file_name, new_file_name)
+                    if verbose
+                        puts "Moving " + sourceDir + "/" + rule["source"] + "/" + file_name + " to " + sourceDir + "/" + rule["dest"] + "/" + new_file_name
+                    end
                     File.rename(sourceDir + "/" + rule["source"] + "/" + file_name, sourceDir + "/" + rule["dest"] + "/" + new_file_name)
                 elsif rule["action"] == "copy"
-                    puts "Copying " + sourceDir + "/" + rule["source"] + "/" + file_name + " to " + sourceDir + "/" + rule["dest"] + "/" + new_file_name
+                    if  verbose
+                        puts "Copying " + sourceDir + "/" + rule["source"] + "/" + file_name + " to " + sourceDir + "/" + rule["dest"] + "/" + new_file_name
+                    end
                     FileUtils.cp(sourceDir + "/" + rule["source"] + "/" + file_name, sourceDir + "/" + rule["dest"] + "/" + new_file_name)
                 else
                     warn "Invalid action on rule"
@@ -85,6 +96,8 @@ sources.each do |sourceDir|
     end
 end
 
-puts "#{matches} files matches"
-puts "Renaming complete!"
+if verbose
+    puts "#{matches} files matches"
+    puts "Renaming complete!"
+end
 
