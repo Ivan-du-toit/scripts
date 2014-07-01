@@ -24,6 +24,17 @@ unless File.exists?(config_file)
     YAML.dump(default_config)
     File.open(config_file, 'w') {|f| f.write default_config.to_yaml }
     puts "No config file found, generating example config to config.yaml"
+    exit
+end
+
+# TODO: Make the config file location configurable by passing it in as a optional paramater.
+# TODO: Add a verbose flag and suppress the output if it is missing.
+if ARGV.length == 0
+    sources.push(".")
+else
+    ARGV.each do |arg|
+        sources.push(arg)
+    end
 end
 
 config = YAML.load_file(config_file)
@@ -39,13 +50,6 @@ end
 matches = 0
 sources = []
 
-if ARGV.length == 0
-    sources.push(".")
-else
-    ARGV.each do |arg|
-        sources.push(arg)
-    end
-end
 sources.each do |sourceDir|
     rules.each do | rule |
         unless Dir.exists?(sourceDir + "/" + rule["source"])
