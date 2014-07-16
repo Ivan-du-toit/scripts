@@ -28,6 +28,7 @@ default_config = {
 
 options = {}
 verbose = false
+skip = false
 OptionParser.new do |opts|
     opts.banner = "Usage: dogPile.rb [options]"
 
@@ -37,6 +38,10 @@ OptionParser.new do |opts|
 
     opts.on("--config [FILE]", String, "Config file location") do |c|
         config_file = c
+    end
+
+    opts.on("-s", "--skip", "Skip missing source dirs") do |s|
+        skip = s
     end
 
     opts.on_tail("-h", "--help", "Show this message") do
@@ -70,10 +75,17 @@ matches = 0
 
 sources.each do |sourceDir|
     rules.each do | rule |
-        #unless Dir.exists?(sourceDir + "/" + rule["source"])
-        unless File.exists?(sourceDir + "/" + rule["source"])
-            puts rule
-            raise "Source folder does not exist for: " + sourceDir + "/" + rule["source"]
+        unless Dir.exists?(sourceDir + "/" + rule["source"])
+        #unless File.exists?(sourceDir + "/" + rule["source"])
+            if skip
+                if verbose
+                    puts "Skipping " + sourceDir + "/" + rule["source"]
+                end
+                next
+            else
+                puts rule
+                raise "Source folder does not exist for: " + sourceDir + "/" + rule["source"]
+            end
         end
 
         Dir.glob(sourceDir + "/" + rule["source"] + "/*.*").each do |original_file|
