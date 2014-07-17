@@ -29,6 +29,8 @@ default_config = {
 options = {}
 verbose = false
 skip = false
+masterSource = ""
+
 OptionParser.new do |opts|
     opts.banner = "Usage: dogPile.rb [options]"
 
@@ -42,6 +44,10 @@ OptionParser.new do |opts|
 
     opts.on("-s", "--skip", "Skip missing source dirs") do |s|
         skip = s
+    end
+
+    opts.on("--getSources [FILE]", String, "Adds all the subdirectories of this directory to the source directory list (replaces existing sources).") do |s|
+        masterSource = s
     end
 
     opts.on_tail("-h", "--help", "Show this message") do
@@ -69,6 +75,21 @@ rules = []
 for rule in config["rules"] do
     rule["match"] = Regexp.new(rule["match"])
     rules.push(rule)
+end
+
+unless masterSource.empty?
+    if verbose
+        puts "Expanding masterSource: " + masterSource
+    end
+    unless Dir.exists?(masterSource)
+        raise "Master source directory does not exist."
+    end
+    sources = []
+    Dir.glob(masterSource + "/*").each do |dir|
+        if Dir.exists?(dir)
+            sources.push(dir)
+        end
+    end
 end
 
 matches = 0
